@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.dao.IDao">
+
+	<select id="loginDao" resultType="com.spring.dto.MemberVO">
+		SELECT * FROM MEMBER
+		WHERE userid = #{param1} AND userpwd = #{param2}
+	</select>
+
+
+	<select id="listDao" resultType="com.spring.dto.BoardVO">
+		SELECT * FROM BOARD
+		ORDER BY bno DESC
+		LIMIT #{param1}, #{param2}
+	</select>
+
+	<select id="countBoardDao" resultType="int">
+		SELECT COUNT(*) FROM BOARD
+	</select>
+
+	<insert id="writeDao">
+		INSERT INTO BOARD (writer, content, title, regdate)
+		VALUES (#{param1}, #{param2}, #{param3}, NOW())
+	</insert>
+
+	<select id="viewDao" resultType="com.spring.dto.BoardVO">
+		SELECT * FROM BOARD
+		WHERE bno = #{param1}
+	</select>
+
+	<update id="upHitDao">
+		UPDATE BOARD SET viewcnt = viewcnt + 1
+		WHERE bno = #{param1}
+	</update>
+
+	<update id="modifyDao">
+		UPDATE BOARD SET title = #{param2}, content =
+		#{param3}
+		WHERE bno = #{param1}
+	</update>
+
+	<delete id="deleteDao">
+		DELETE FROM BOARD WHERE bno = #{param1}
+	</delete>
+
+
+	<select id="getMyAttendanceDao"
+		resultType="com.spring.dto.AttendanceVO">
+		SELECT ano, userid, state,
+		DATE_FORMAT(work_date, '%Y-%m-%d') as work_date,
+		DATE_FORMAT(start_time, '%H:%i:%s') as start_time,
+		DATE_FORMAT(end_time, '%H:%i:%s') as end_time
+		FROM ATTENDANCE
+		WHERE userid = #{param1}
+		ORDER
+		BY work_date DESC, start_time DESC
+	</select>
+
+	<select id="checkTodayAttendance" resultType="int">
+		SELECT COUNT(*)
+		FROM ATTENDANCE
+		WHERE userid = #{param1} AND work_date = CURDATE()
+	</select>
+
+	<insert id="insertCheckInDao">
+		INSERT INTO ATTENDANCE (userid, work_date,
+		start_time, state)
+		VALUES (#{param1}, CURDATE(), CURTIME(), #{param2})
+	</insert>
+
+	<update id="updateCheckOutDao">
+		UPDATE ATTENDANCE
+		SET end_time = CURTIME()
+		WHERE userid
+		= #{param1} AND work_date = CURDATE()
+	</update>
+
+
+	<select id="listMemberDao" resultType="com.spring.dto.MemberVO">
+		SELECT * FROM MEMBER WHERE 1=1
+		<if test="param1 != null and param1 != ''"> AND dept = #{param1} </if>
+		<if test="param2 != null and param2 != ''"> AND status = #{param2} </if>
+		<if test="param3 != null and param3 != ''">
+			AND (username LIKE CONCAT('%', #{param3}, '%') OR userid
+			LIKE CONCAT('%', #{param3}, '%'))
+		</if>
+		ORDER BY userid DESC
+	</select>
+
+	<insert id="registerMemberDao">
+		INSERT INTO MEMBER (userid, userpwd, username, dept,
+		job_title, role, status, phone, email, address)
+		VALUES (#{param1},
+		#{param2}, #{param3}, #{param4}, #{param5}, #{param6}, '재직',
+		#{param7}, #{param8}, #{param9})
+	</insert>
+
+	<select id="viewMemberDao" resultType="com.spring.dto.MemberVO">
+		SELECT * FROM MEMBER WHERE
+		userid = #{param1}
+	</select>
+
+	<update id="updateMemberDao">
+		UPDATE MEMBER
+		SET userpwd = #{param2}, username =
+		#{param3}, dept = #{param4},
+		job_title = #{param5}, role = #{param6}, status = #{param7},
+		phone = #{param8}, email = #{param9}, address = #{param10}
+		WHERE userid =
+		#{param1}
+	</update>
+
+
+	<select id="viewDiagramDao"
+		resultType="com.spring.dto.DiagramVO">
+		SELECT dno, category, title, img_path,
+		DATE_FORMAT(regdate, '%Y-%m-%d') as regdate,
+		manager
+		FROM DIAGRAM
+		WHERE category = #{param1}
+	</select>
+
+
+	<select id="listLogsDao" resultType="com.spring.dto.LogsVO">
+		SELECT * FROM LOGS_TABLE
+		WHERE category = #{param1}
+		ORDER BY log_date DESC, lno DESC
+	</select>
+
+	<select id="viewLogDao" resultType="com.spring.dto.LogsVO">
+		SELECT * FROM LOGS_TABLE
+		WHERE lno = #{param1}
+	</select>
+
+	<insert id="writeLogDao">
+		INSERT INTO LOGS_TABLE (category, log_date, writer,
+		worker, temp, memo, content)
+		VALUES (#{param1}, #{param2}, #{param3},
+		#{param4}, #{param5}, #{param6}, #{param7})
+	</insert>
+
+	<update id="updateLogDao">
+		UPDATE LOGS_TABLE
+		SET worker = #{param2}, temp =
+		#{param3}, content = #{param4}, memo = #{param5}
+		WHERE lno = #{param1}
+	</update>
+
+	<delete id="deleteLogDao">
+		DELETE FROM LOGS_TABLE
+		WHERE lno = #{param1}
+	</delete>
+
+</mapper>
