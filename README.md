@@ -1,13 +1,12 @@
-```markdown
 # 🏢 태평로빌딩 통합 관리 시스템
 
-[![Java](https://img.shields.io/badge/Java-17-orange?logo=java)](https://www.java.com)
+[![Java](https://img.shields.io/badge/Java-8-orange?logo=java)](https://www.java.com)
 [![Spring](https://img.shields.io/badge/Spring_MVC-5.0.2-brightgreen?logo=spring)](https://spring.io)
 [![MyBatis](https://img.shields.io/badge/MyBatis-3.5.9-blue)](https://mybatis.org)
-[![MariaDB](https://img.shields.io/badge/MariaDB-blue?logo=mariadb)](https://mariadb.org)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?logo=mysql)](https://www.mysql.com)
 [![Tomcat](https://img.shields.io/badge/Tomcat-9.x-yellow?logo=apachetomcat)](https://tomcat.apache.org)
 
-건물 시설 관리팀을 위한 **사내 인트라넷 통합 관리 시스템**입니다.  
+건물 시설 관리팀을 위한 **사내 통합 관리 시스템**입니다.  
 근태 관리, 시설 일지 작성, 계통도 열람, 사내 게시판, 직원 계정 관리(ADMIN) 기능을 제공합니다.
 
 ---
@@ -18,7 +17,7 @@
 2. [기술 스택](#-기술-스택)
 3. [아키텍처](#-아키텍처)
 4. [DB 설계](#-db-설계)
-5. https://aws.amazon.com/ko/what-is/routing/(#-url-구조-라우팅)
+5. [URL 구조 (라우팅)](#-url-구조-라우팅)
 6. [MyBatis SQL 명세](#-mybatis-sql-명세)
 7. [JSP 뷰 목록](#-jsp-뷰-목록)
 8. [설치 및 실행](#-설치-및-실행)
@@ -85,11 +84,11 @@
 
 | 구분 | 기술 | 버전 |
 |------|------|------|
-| 언어 | Java (JRE) | 17 |
+| 언어 | Java | 8 |
 | 프레임워크 | Spring MVC | 5.0.2.RELEASE |
 | ORM | MyBatis + MyBatis-Spring | 3.5.9 / 2.0.7 |
-| DB | MariaDB | - |
-| DB 드라이버 | mariadb-java-client | - |
+| DB | MySQL | 8.0 |
+| DB 드라이버 | mysql-connector-j | 8.0.33 |
 | 뷰 | JSP + JSTL | 1.2 |
 | JSON | Jackson Databind | 2.15.2 |
 | 코드 간소화 | Lombok | 1.18.28 |
@@ -103,39 +102,31 @@
 
 ## 🏗 아키텍처
 
-
 ```
-
 브라우저 (JSP + JSTL)
-│  HTTP 요청
-▼
+    │  HTTP 요청
+    ▼
 DispatcherServlet (web.xml: 모든 요청 "/" 처리)
-│
-▼
+    │
+    ▼
 OrderController (@Controller)
-│  @Autowired
-▼
+    │  @Autowired
+    ▼
 IDao (MyBatis Mapper Interface)
-│  SqlSession → IDoMapper.xml
-▼
-MariaDB (mybatis_db)
-
+    │  SqlSession → IDoMapper.xml
+    ▼
+MySQL (mybatis_db)
 ```
 
 **Spring 컨텍스트 구조:**
-
 ```
-
 root-context.xml       → DataSource, SqlSessionFactory, SqlSession, MapperScanner 설정
 servlet-context.xml    → DispatcherServlet, ViewResolver (/WEB-INF/views/*.jsp), 정적 자원
 web.xml                → DispatcherServlet 등록, UTF-8 필터, welcome-file(index.jsp)
-
 ```
 
 **패키지 구조 (com.spring):**
-
 ```
-
 com.spring
 ├── controller
 │   └── OrderController.java     ← 전체 요청 처리 단일 컨트롤러
@@ -143,12 +134,11 @@ com.spring
 │   ├── IDao.java                ← MyBatis Mapper 인터페이스
 │   └── IDoMapper.xml            ← SQL 쿼리 정의 파일
 └── dto
-├── MemberVO.java            ← 직원 정보
-├── BoardVO.java             ← 게시글
-├── AttendanceVO.java        ← 근태 기록
-├── DiagramVO.java           ← 계통도 정보
-└── LogsVO.java              ← 운전 일지
-
+    ├── MemberVO.java            ← 직원 정보
+    ├── BoardVO.java             ← 게시글
+    ├── AttendanceVO.java        ← 근태 기록
+    ├── DiagramVO.java           ← 계통도 정보
+    └── LogsVO.java              ← 운전 일지
 ```
 
 ---
@@ -393,46 +383,36 @@ com.spring
 ```sql
 -- init.sql 실행
 mysql -u root -p < init.sql
-
 ```
 
-또는 MariaDB 클라이언트에서:
-
+또는 MySQL 클라이언트에서:
 ```sql
 SOURCE /경로/init.sql;
-
 ```
 
 기본 ADMIN 계정이 자동 생성됩니다:
-
-* **사번**: `admin`
-* **비밀번호**: `1234`
+- **사번**: `admin`
+- **비밀번호**: `1234`
 
 ### 2. DB 연결 정보 수정
 
 `WEB-INF/spring/root-context.xml`에서 수정:
-
 ```xml
 <property name="url"
-  value="jdbc:mariadb://127.0.0.1:3306/mybatis_db?useUnicode=true&amp;characterEncoding=utf8"/>
+  value="jdbc:mysql://127.0.0.1:3309/mybatis_db?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf8"/>
 <property name="username" value="root"/>
 <property name="password" value="여기에_비밀번호"/>
-
 ```
-
-> **포트**: 기본 MariaDB 포트는 `3306`입니다. 환경에 맞게 변경하세요.
+> **포트**: 기본 MySQL 포트는 `3306`입니다. 현재 설정은 `3309`이므로 환경에 맞게 변경하세요.
 
 ### 3. Tomcat 배포
-
 1. Maven으로 WAR 빌드: `mvn clean package`
 2. 생성된 `order1-0.0.1-SNAPSHOT.war`를 Tomcat `webapps/ROOT/`에 배포
 3. (또는 Eclipse/IntelliJ에서 서버 직접 실행)
 
 ### 4. 접속
-
 ```
-인트라넷 할당 IP 또는 http://localhost:8080/
-
+http://localhost:8080/
 ```
 
 ---
@@ -440,7 +420,7 @@ SOURCE /경로/init.sql;
 ## 🔧 환경 설정
 
 | 설정 파일 | 역할 | 주요 항목 |
-| --- | --- | --- |
+|-----------|------|-----------|
 | `web.xml` | 서블릿 설정 | DispatcherServlet, UTF-8 인코딩 필터, welcome-file |
 | `root-context.xml` | 루트 컨텍스트 | DataSource, SqlSessionFactory, SqlSession, MapperScanner |
 | `servlet-context.xml` | 서블릿 컨텍스트 | ViewResolver(prefix/suffix), 정적 자원 경로, 컴포넌트 스캔 |
@@ -451,7 +431,7 @@ SOURCE /경로/init.sql;
 ## ⚠️ 보안 주의사항
 
 | 항목 | 현재 상태 | 권고 조치 |
-| --- | --- | --- |
+|------|-----------|-----------|
 | 비밀번호 암호화 | ❌ 평문 저장 | BCrypt 등 단방향 해시 적용 |
 | ADMIN 권한 검증 | ❌ 컨트롤러 레벨 미검증 (JSP에서만 메뉴 숨김) | `HttpSession`에서 role 확인 후 미승인 시 403 처리 |
 | SQL Injection | ✅ MyBatis `#{}` 사용 (PreparedStatement) | - |
@@ -489,7 +469,7 @@ ROOT/
     │           ├── AttendanceVO.java
     │           ├── DiagramVO.java
     │           └── LogsVO.java
-    ├── lib/                 ← JAR 라이브러리 (Spring, MyBatis, MariaDB 등)
+    ├── lib/                 ← JAR 라이브러리 (Spring, MyBatis, MySQL 등)
     └── views/               ← JSP 뷰 파일 24개
         ├── login.jsp
         ├── index.jsp        ← 대시보드
@@ -498,9 +478,4 @@ ROOT/
         ├── logs_*.jsp
         ├── board*.jsp
         └── admin*.jsp
-
-```
-
-```
-
 ```
