@@ -8,9 +8,10 @@
 
 건물 시설 관리팀을 위한 **사내 통합 관리 시스템**입니다.  
 근태 관리, 시설 일지 작성, 계통도 열람, 사내 게시판, 직원 계정 관리(ADMIN) 기능을 제공합니다.
+
+---
 전체파일:https://drive.google.com/file/d/17aMYy3NG5JTalE2lGlx_DHruZOsKv27K/view?usp=drive_link
 ---
-
 ## 📑 목차
 
 1. [주요 기능](#-주요-기능)
