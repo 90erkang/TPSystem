@@ -1,12 +1,12 @@
 # 🏢 태평로빌딩 통합 관리 시스템
 
-[![Java](https://img.shields.io/badge/Java-8-orange?logo=java)](https://www.java.com)
+[![Java](https://img.shields.io/badge/Java-17-orange?logo=java)](https://www.java.com)
 [![Spring](https://img.shields.io/badge/Spring_MVC-5.0.2-brightgreen?logo=spring)](https://spring.io)
 [![MyBatis](https://img.shields.io/badge/MyBatis-3.5.9-blue)](https://mybatis.org)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?logo=mysql)](https://www.mysql.com)
-[![Tomcat](https://img.shields.io/badge/Tomcat-9.x-yellow?logo=apachetomcat)](https://tomcat.apache.org)
+[![MariaDB](https://img.shields.io/badge/MariaDB-blue?logo=mariadb)](https://mariadb.org)
+[![Tomcat](https://img.shields.io/badge/Tomcat-9-yellow?logo=apachetomcat)](https://tomcat.apache.org)
 
-건물 시설 관리팀을 위한 **사내 통합 관리 시스템**입니다.  
+건물 시설 관리팀을 위한 **사내 인트라넷 통합 관리 시스템**입니다.  
 근태 관리, 시설 일지 작성, 계통도 열람, 사내 게시판, 직원 계정 관리(ADMIN) 기능을 제공합니다.
 
 ---
@@ -17,7 +17,7 @@
 2. [기술 스택](#-기술-스택)
 3. [아키텍처](#-아키텍처)
 4. [DB 설계](#-db-설계)
-5. [URL 구조 (라우팅)](#-url-구조-라우팅)
+5. [구조 (라우팅)](#-url-구조-라우팅)
 6. [MyBatis SQL 명세](#-mybatis-sql-명세)
 7. [JSP 뷰 목록](#-jsp-뷰-목록)
 8. [설치 및 실행](#-설치-및-실행)
@@ -84,15 +84,15 @@
 
 | 구분 | 기술 | 버전 |
 |------|------|------|
-| 언어 | Java | 8 |
+| 언어 | Java (JRE) | 17 |
 | 프레임워크 | Spring MVC | 5.0.2.RELEASE |
 | ORM | MyBatis + MyBatis-Spring | 3.5.9 / 2.0.7 |
-| DB | MySQL | 8.0 |
-| DB 드라이버 | mysql-connector-j | 8.0.33 |
+| DB | MariaDB | - |
+| DB 드라이버 | mariadb-java-client | - |
 | 뷰 | JSP + JSTL | 1.2 |
 | JSON | Jackson Databind | 2.15.2 |
 | 코드 간소화 | Lombok | 1.18.28 |
-| 배포 | Apache Tomcat | 9.x (WAR) |
+| 배포 | Apache Tomcat | 9 |
 | 빌드 | Maven | 3.8.1 |
 | 프론트엔드 | HTML/CSS/JS (Vanilla) | - |
 | 아이콘 | FontAwesome | 6.4.2 (CDN) |
@@ -102,7 +102,7 @@
 
 ## 🏗 아키텍처
 
-```
+```text
 브라우저 (JSP + JSTL)
     │  HTTP 요청
     ▼
@@ -115,18 +115,18 @@ OrderController (@Controller)
 IDao (MyBatis Mapper Interface)
     │  SqlSession → IDoMapper.xml
     ▼
-MySQL (mybatis_db)
+MariaDB (mybatis_db)
 ```
 
 **Spring 컨텍스트 구조:**
-```
+```text
 root-context.xml       → DataSource, SqlSessionFactory, SqlSession, MapperScanner 설정
 servlet-context.xml    → DispatcherServlet, ViewResolver (/WEB-INF/views/*.jsp), 정적 자원
 web.xml                → DispatcherServlet 등록, UTF-8 필터, welcome-file(index.jsp)
 ```
 
 **패키지 구조 (com.spring):**
-```
+```text
 com.spring
 ├── controller
 │   └── OrderController.java     ← 전체 요청 처리 단일 컨트롤러
@@ -263,7 +263,7 @@ com.spring
 
 | Method | URL | 설명 | 뷰 |
 |--------|-----|------|-----|
-| GET | `/board` | 게시글 목록 (페이징, page 파라미터) | `board.jsp` |
+| GET | `/board` | 게시판 목록 (페이징, page 파라미터) | `board.jsp` |
 | GET | `/board/write` | 게시글 작성 폼 | `board_write.jsp` |
 | POST | `/board/register` | 게시글 저장 → `/board` 리다이렉트 | - |
 | GET | `/board/detail?bno=` | 게시글 상세 (조회수 +1) | `board_detail.jsp` |
@@ -385,7 +385,7 @@ com.spring
 mysql -u root -p < init.sql
 ```
 
-또는 MySQL 클라이언트에서:
+또는 MariaDB 클라이언트에서:
 ```sql
 SOURCE /경로/init.sql;
 ```
@@ -399,11 +399,11 @@ SOURCE /경로/init.sql;
 `WEB-INF/spring/root-context.xml`에서 수정:
 ```xml
 <property name="url"
-  value="jdbc:mysql://127.0.0.1:3309/mybatis_db?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf8"/>
+  value="jdbc:mariadb://127.0.0.1:3306/mybatis_db?useUnicode=true&amp;characterEncoding=utf8"/>
 <property name="username" value="root"/>
 <property name="password" value="여기에_비밀번호"/>
 ```
-> **포트**: 기본 MySQL 포트는 `3306`입니다. 현재 설정은 `3309`이므로 환경에 맞게 변경하세요.
+> **포트**: 기본 MariaDB 포트는 `3306`입니다. 환경에 맞게 변경하세요.
 
 ### 3. Tomcat 배포
 1. Maven으로 WAR 빌드: `mvn clean package`
@@ -411,8 +411,8 @@ SOURCE /경로/init.sql;
 3. (또는 Eclipse/IntelliJ에서 서버 직접 실행)
 
 ### 4. 접속
-```
-http://localhost:8080/
+```text
+사내 인트라넷 할당 IP 또는 http://localhost:8080/
 ```
 
 ---
@@ -443,7 +443,7 @@ http://localhost:8080/
 
 ## 📂 프로젝트 파일 구조
 
-```
+```text
 ROOT/
 ├── META-INF/
 │   ├── MANIFEST.MF
@@ -469,7 +469,7 @@ ROOT/
     │           ├── AttendanceVO.java
     │           ├── DiagramVO.java
     │           └── LogsVO.java
-    ├── lib/                 ← JAR 라이브러리 (Spring, MyBatis, MySQL 등)
+    ├── lib/                 ← JAR 라이브러리 (Spring, MyBatis, MariaDB 등)
     └── views/               ← JSP 뷰 파일 24개
         ├── login.jsp
         ├── index.jsp        ← 대시보드
